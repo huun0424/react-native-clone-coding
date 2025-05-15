@@ -11,7 +11,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="(home)"
         options={{
           tabBarLabel: () => null,
           tabBarIcon: ({ focused }) => (
@@ -75,6 +75,18 @@ export default function TabLayout() {
               size={24}
             />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="(home)/following"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="(post)/[username]/post/[postID]"
+        options={{
+          href: null,
         }}
       />
     </Tabs>
