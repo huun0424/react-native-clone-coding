@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { type BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
-import { Tabs } from 'expo-router';
+import { Tabs, useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
   Animated,
@@ -58,8 +58,10 @@ const AnimatedTabBarButton = ({
 };
 
 export default function TabLayout() {
-  const isLoggedIn = false;
+  const isLoggedIn = !false;
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  const router = useRouter();
 
   const openLoginModal = () => {
     console.log('openLoginModal');
@@ -110,10 +112,14 @@ export default function TabLayout() {
           name="add"
           listeners={{
             tabPress: (e) => {
+              e.preventDefault();
+
               if (!isLoggedIn) {
-                e.preventDefault();
                 openLoginModal();
+                return;
               }
+
+              router.navigate('/modal');
             },
           }}
           options={{
