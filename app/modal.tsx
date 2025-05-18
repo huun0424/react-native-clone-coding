@@ -1,9 +1,12 @@
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
+  Alert,
   FlatList,
   Image,
+  Linking,
   Pressable,
   StyleSheet,
   Text,
@@ -93,6 +96,42 @@ export default function Modal() {
 
   const removeImageFromThread = (id: string, uriToRemove: string) => {};
 
+  const getMyLocation = async (id: string) => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    // console.log('getMyLocation', status);
+    if (status !== 'granted') {
+      Alert.alert(
+        'Location permission not granted',
+        'Please grant location permission to use this feature',
+        [
+          {
+            text: 'Open settings',
+            onPress: () => {
+              Linking.openSettings();
+            },
+          },
+          {
+            text: 'Cancel',
+          },
+        ]
+      );
+      return;
+    }
+
+    const location = await Location.getCurrentPositionAsync({});
+
+    setThreads((prevThreads) =>
+      prevThreads.map((thread) =>
+        thread.id === id
+          ? {
+              ...thread,
+              location: [location.coords.latitude, location.coords.longitude],
+            }
+          : thread
+      )
+    );
+  };
+
   const renderThreadItem = ({
     item,
     index,
@@ -179,9 +218,7 @@ export default function Modal() {
           </Pressable>
           <Pressable
             style={styles.actionButton}
-            onPress={() => {
-              console.log('get location');
-            }}
+            onPress={() => getMyLocation(item.id)}
           >
             <FontAwesome name="map-marker" size={24} color="#777" />
           </Pressable>
