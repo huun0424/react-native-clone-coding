@@ -1,5 +1,7 @@
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
+import * as MediaLibrary from 'expo-media-library';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -77,8 +79,12 @@ export default function Modal() {
     );
   };
 
-  const canAddThread = (threads.at(-1)?.text.trim().length ?? 0) > 0;
-  const canPost = threads.every((thread) => thread.text.trim().length > 0);
+  const canAddThread =
+    (threads.at(-1)?.text.trim().length ?? 0) > 0 ||
+    (threads.at(-1)?.imageUris.length ?? 0) > 0;
+  const canPost = threads.every(
+    (thread) => thread.text.trim().length > 0 || thread.imageUris.length > 0
+  );
 
   const addImageToThread = (id: string, uri: string) => {};
 
@@ -90,11 +96,111 @@ export default function Modal() {
     );
   };
 
-  const pickImage = async (id: string) => {};
+  const pickImage = async (id: string) => {
+    let { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permission not granted',
+        'Please grant permission to use this feature',
+        [
+          {
+            text: 'Open settings',
+            onPress: () => {
+              Linking.openSettings();
+            },
+          },
+          { text: 'Cancel' },
+        ]
+      );
+      return;
+    }
 
-  const takePhoto = async (id: string) => {};
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images', 'videos'],
+      allowsMultipleSelection: true,
+      selectionLimit: 5,
+    });
 
-  const removeImageFromThread = (id: string, uriToRemove: string) => {};
+    if (result.canceled) {
+      return;
+    }
+
+    if (result.assets) {
+      console.log(result.assets);
+      setThreads((prevThreads) =>
+        prevThreads.map((thread) =>
+          thread.id === id
+            ? { ...thread, imageUris: result.assets.map((asset) => asset.uri) }
+            : thread
+        )
+      );
+    }
+  };
+
+  const takePhoto = async (id: string) => {
+    let { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permission not granted',
+        'Please grant permission to use this feature',
+        [
+          {
+            text: 'Open settings',
+            onPress: () => {
+              Linking.openSettings();
+            },
+          },
+          { text: 'Cancel' },
+        ]
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ['images', 'livePhotos', 'videos'],
+      allowsMultipleSelection: true,
+      selectionLimit: 5,
+    });
+
+    if (result.canceled) {
+      return;
+    }
+
+    status = (await MediaLibrary.requestPermissionsAsync()).status;
+
+    if (status === 'granted' && result.assets) {
+      MediaLibrary.saveToLibraryAsync(result.assets[0].uri);
+    }
+
+    if (result.assets) {
+      console.log(result.assets);
+      setThreads((prevThreads) =>
+        prevThreads.map((thread) =>
+          thread.id === id
+            ? {
+                ...thread,
+                imageUris: thread.imageUris.concat(
+                  result.assets.map((asset) => asset.uri)
+                ),
+              }
+            : thread
+        )
+      );
+    }
+  };
+
+  const removeImageFromThread = (id: string, uriToRemove: string) => {
+    setThreads((prevThreads) =>
+      prevThreads.map((thread) =>
+        thread.id === id
+          ? {
+              ...thread,
+              imageUris: thread.imageUris.filter((uri) => uri !== uriToRemove),
+            }
+          : thread
+      )
+    );
+  };
 
   const getMyLocation = async (id: string) => {
     let { status } = await Location.requestForegroundPermissionsAsync();
