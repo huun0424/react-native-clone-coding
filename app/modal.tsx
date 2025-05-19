@@ -10,6 +10,7 @@ import {
   Image,
   Linking,
   Pressable,
+  Modal as RNModal,
   StyleSheet,
   Text,
   TextInput,
@@ -366,6 +367,45 @@ export default function Modal() {
         contentContainerStyle={{ backgroundColor: '#ddd' }}
         keyboardShouldPersistTaps="handled"
       />
+
+      <RNModal
+        transparent={true}
+        visible={isDropdownVisible}
+        animationType="fade"
+        onRequestClose={() => setIsDropdownVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setIsDropdownVisible(false)}
+        >
+          <View
+            style={[styles.dropdownContainer, { bottom: insets.bottom + 30 }]}
+          >
+            {replyOptions.map((option) => (
+              <Pressable
+                key={option}
+                style={[
+                  styles.dropdownOption,
+                  option === replyOption && styles.selectedOption,
+                ]}
+                onPress={() => {
+                  setReplyOption(option);
+                  setIsDropdownVisible(false);
+                }}
+              >
+                <Text
+                  style={[
+                    styles.dropdownOptionText,
+                    option === replyOption && styles.selectedOptionText,
+                  ]}
+                >
+                  {option}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </Pressable>
+      </RNModal>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 10 }]}>
         <Pressable onPress={() => setIsDropdownVisible(true)}>
