@@ -1,11 +1,14 @@
 import { AuthContext } from '@/app/_layout';
+import SideMenu from '@/components/SideMenu';
+import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { usePathname, useRouter } from 'expo-router';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import {
   Dimensions,
   Image,
   PixelRatio,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -14,7 +17,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Index() {
-  const { user } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
+
+  const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -29,6 +34,20 @@ export default function Index() {
   return (
     <SafeAreaView style={styles.container}>
       <BlurView intensity={70} style={styles.header}>
+        {isLoggedIn && (
+          <Pressable
+            style={styles.menuButton}
+            onPress={() => setIsSideMenuOpen((prev) => !prev)}
+          >
+            <Ionicons name="menu" size={24} color="black" />
+          </Pressable>
+        )}
+
+        <SideMenu
+          isVisible={isSideMenuOpen}
+          onClose={() => setIsSideMenuOpen(false)}
+        />
+
         <Image
           source={require('../../../assets/images/react-logo.png')}
           style={styles.headerLogo}
@@ -36,7 +55,10 @@ export default function Index() {
         {!isLoggedIn && (
           <TouchableOpacity
             style={styles.headerLoginButton}
-            onPress={() => router.push('/login')}
+            onPress={() => {
+              logout();
+              router.push('/login');
+            }}
           >
             <Text style={styles.headerLoginButtonText}>로그인</Text>
           </TouchableOpacity>
@@ -113,5 +135,10 @@ const styles = StyleSheet.create({
   },
   headerLoginButtonText: {
     color: 'white',
+  },
+  menuButton: {
+    position: 'absolute',
+    left: 20,
+    top: 10,
   },
 });

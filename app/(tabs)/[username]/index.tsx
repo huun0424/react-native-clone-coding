@@ -1,19 +1,58 @@
+import { AuthContext } from '@/app/_layout';
+import SideMenu from '@/components/SideMenu';
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Text, TouchableOpacity, View } from 'react-native';
-
+import { useContext, useState } from 'react';
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export default function Index() {
+  const { user } = useContext(AuthContext);
+
+  const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
+
   const router = useRouter();
   const { username } = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
 
+  const isLoggedIn = !!user;
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
-      <View>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={styles.header}>
+        {isLoggedIn && (
+          <Pressable
+            style={styles.menuButton}
+            onPress={() => setIsSideMenuOpen((prev) => !prev)}
+          >
+            <Ionicons name="menu" size={24} color="black" />
+          </Pressable>
+        )}
+
+        <SideMenu
+          isVisible={isSideMenuOpen}
+          onClose={() => setIsSideMenuOpen(false)}
+        />
+      </View>
+
+      <View style={styles.profile}>
+        <View style={styles.profileHeader}>
+          <Image
+            source={{ uri: user?.profileImageUrl }}
+            style={styles.profileImage}
+          />
+          <Text>{user?.name}</Text>
+          <Text>{user?.id}</Text>
+          <Text>{user?.description}</Text>
+        </View>
+      </View>
+
+      <View style={styles.tabBar}>
         <TouchableOpacity onPress={() => router.push(`/${username}`)}>
           <Text>Threads</Text>
         </TouchableOpacity>
@@ -27,3 +66,33 @@ export default function Index() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    alignItems: 'center',
+    height: 50,
+  },
+  menuButton: {
+    position: 'absolute',
+    left: 20,
+    top: 10,
+  },
+  tabBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  container: {
+    flex: 1,
+  },
+  profile: {
+    alignItems: 'center',
+  },
+  profileHeader: {
+    flexDirection: 'column',
+  },
+  profileImage: {
+    width: 50,
+    height: 50,
+  },
+});
