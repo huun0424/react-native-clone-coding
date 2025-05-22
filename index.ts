@@ -24,6 +24,9 @@ if (__DEV__) {
             refreshToken: '1234567890',
             user: {
               id: 'huun',
+              name: 'Huun',
+              description: 'Huun is a developer',
+              profileImage: 'https://i.pravatar.cc/150?img=1',
             },
           };
         }
