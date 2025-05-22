@@ -1,11 +1,13 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Redirect, router } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useContext } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AuthContext } from './_layout';
 
 export default function Login() {
-  const isLoggedIn = false;
+  const { user, login } = useContext(AuthContext);
+
+  const isLoggedIn = !!user;
 
   const insets = useSafeAreaInsets();
 
@@ -13,45 +15,13 @@ export default function Login() {
     return <Redirect href="/(tabs)" />;
   }
 
-  const onLogin = () => {
-    console.log('onLogin');
-    fetch('/login', {
-      method: 'POST',
-      body: JSON.stringify({
-        username: 'huun',
-        password: '123456',
-      }),
-    })
-      .then((res) => {
-        console.log('res', res, res.status);
-        if (res.status === 401) {
-          return Alert.alert('Invalid username or password');
-        }
-        return res.json();
-      })
-      .then((data) => {
-        console.log('data', data);
-        Promise.all([
-          SecureStore.setItemAsync('accessToken', data.accessToken),
-          SecureStore.setItemAsync('refreshToken', data.refreshToken),
-          AsyncStorage.setItem('user', JSON.stringify(data.user)),
-        ]);
-      })
-      .then(() => {
-        router.replace('/(tabs)');
-      })
-      .catch((error) => {
-        console.error('error', error);
-      });
-  };
-
   return (
     <View style={{ paddingTop: insets.top }}>
       <Pressable onPress={() => router.back()}>
         <Text>Back</Text>
       </Pressable>
 
-      <Pressable style={styles.loginButton} onPress={onLogin}>
+      <Pressable style={styles.loginButton} onPress={login}>
         <Text style={styles.loginButtonText}>Login</Text>
       </Pressable>
     </View>

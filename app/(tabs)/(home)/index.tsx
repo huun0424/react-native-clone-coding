@@ -1,5 +1,7 @@
+import { AuthContext } from '@/app/_layout';
 import { BlurView } from 'expo-blur';
 import { usePathname, useRouter } from 'expo-router';
+import { useContext } from 'react';
 import {
   Dimensions,
   Image,
@@ -12,9 +14,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Index() {
+  const { user } = useContext(AuthContext);
+
   const router = useRouter();
   const pathname = usePathname();
-  const isLoggedIn = false;
+  const isLoggedIn = !!user;
 
   const { width, height } = Dimensions.get('window');
   console.log('화면 너비: ', width);
